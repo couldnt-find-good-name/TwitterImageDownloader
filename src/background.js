@@ -1,40 +1,61 @@
 chrome.browserAction.onClicked.addListener((tab) => {
-	chrome.tabs.executeScript(tab.id, {file: 'inject.js'})
-	chrome.tabs.insertCSS(tab.id, {file: 'base.css'})
+	chrome.tabs.executeScript(tab.id, {file: 'src/inject.js'})
+	chrome.tabs.insertCSS(tab.id, {file: 'src/base.scss'})
 })
 
 var authorization = ''
 var csrf_token = ''
 
-function download_item (request) {
-	chrome.storage.local.get('path', result => {
-		chrome.storage.local.get('use_id', r => {
-			if (r.use_id) {
-				for (let i of request) {
-					i.filename = (result.path || '') + i.filename
-					try {
-						chrome.downloads.download(i)
-					} catch (e) {
-						console.log(e)
-					}
-				}
-			} else {
-				for (let i of request) {
-					let s = i.url.split('/')
-					let name = (result.path || '') + s[s.length - 1].replace(/:.*$/, '')
-					if (i.url.match('blob:')) {
-						name += '.ts'
-					}
-					try {
-						chrome.downloads.download({url: i.url, filename: name})
-					} catch (e) {
-						console.log(e)
-					}
-				}
-			}
-		})
-	})
+function download_item(request) {
+    chrome.storage.local.get(['path', 'use_id', 'use_zip'], settings => {
+        const basePath = settings.path || '';
+        const useZip = settings.use_zip || false;
+        const useId = settings.use_id || false;
+
+        if (request.length === 1 || !useZip) {
+            // Legacy download logic
+            request.forEach(item => {
+                let filename = basePath + (useId ? createFilenameUsingId(item) : item.filename);
+                try {
+                    chrome.downloads.download({url: item.url, filename: filename});
+                } catch (e) {
+                    console.error('Download error:', e);
+                }
+            });
+        } else {
+            // ZIP download logic
+            var zip = new JSZip();
+            let pendingFiles = request.length;
+            request.forEach(item => {
+                let filename = useId ? createFilenameUsingId(item) : item.filename;
+                fetch(item.url)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        zip.file(filename, blob, {binary: true});
+                        if (--pendingFiles === 0) {
+                            zip.generateAsync({type:"blob"})
+                                .then(content => {
+                                    let url = URL.createObjectURL(content);
+                                    chrome.downloads.download({
+                                        url: url,
+                                        filename: basePath + 'downloaded_images.zip'
+                                    });
+                                })
+                                .catch(e => console.error('ZIP generation error:', e));
+                        }
+                    })
+                    .catch(e => console.error('Fetch error:', e));
+            });
+        }
+    });
 }
+
+function createFilenameUsingId(item) {
+    let urlParts = item.url.split('/');
+    let identifier = urlParts[urlParts.length - 2];
+    return identifier + '_' + item.filename;
+}
+
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 	if (request.hasOwnProperty('id')) {
