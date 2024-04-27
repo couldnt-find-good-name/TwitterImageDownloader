@@ -1,6 +1,6 @@
 let dir = document.querySelector('#dir');
 let id = document.querySelector('#id');
-let useZip = document.querySelector('#use_zip');  // Checkbox for new option
+let useZip = document.querySelector('#use_zip');
 
 function saveOptions() {
     let path = dir.value.replace(/\/+$/, '') + '/';

@@ -1,6 +1,6 @@
 chrome.browserAction.onClicked.addListener((tab) => {
-	chrome.tabs.executeScript(tab.id, {file: 'inject.js'})
-	chrome.tabs.insertCSS(tab.id, {file: 'base.css'})
+	chrome.tabs.executeScript(tab.id, {file: 'src/inject.js'})
+	chrome.tabs.insertCSS(tab.id, {file: 'src/base.scss'})
 })
 
 var authorization = ''
@@ -13,7 +13,7 @@ function download_item(request) {
         const useId = settings.use_id || false;
 
         if (request.length === 1 || !useZip) {
-            // Legacy download logic with user-defined path and error handling
+            // Legacy download logic
             request.forEach(item => {
                 let filename = basePath + (useId ? createFilenameUsingId(item) : item.filename);
                 try {
@@ -51,9 +51,8 @@ function download_item(request) {
 }
 
 function createFilenameUsingId(item) {
-    // Assuming item.url and item.filename can be used to extract identifiers
     let urlParts = item.url.split('/');
-    let identifier = urlParts[urlParts.length - 2];  // Adjust this according to actual URL structure
+    let identifier = urlParts[urlParts.length - 2];
     return identifier + '_' + item.filename;
 }
 
