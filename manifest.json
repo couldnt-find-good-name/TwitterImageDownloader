@@ -22,7 +22,7 @@
     "downloads",
     "storage",
     "webRequest",
-    "*://*.twitter.com/*"
+    "*://*.x.com/*"
   ],
   "icons": {
     "48": "assets/icon48.png",

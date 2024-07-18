@@ -562,7 +562,7 @@
 			console.log(auth)
 			let url = ''
 			let xhr = new XMLHttpRequest()
-			xhr.open('GET', 'https://api.twitter.com/1.1/statuses/show/' + id + '.json', false)
+			xhr.open('GET', 'https://api.x.com/1.1/statuses/show/' + id + '.json', false)
 			xhr.withCredentials = true
 			xhr.crossDomain = true
 			xhr.setRequestHeader('authorization', auth.authorization)
@@ -583,7 +583,7 @@
 					}
 				}
 			} else {
-				xhr.open('GET', 'https://api.twitter.com/1.1/videos/tweet/config/' + id + '.json', false)
+				xhr.open('GET', 'https://api.x.com/1.1/videos/tweet/config/' + id + '.json', false)
 				xhr.withCredentials = true
 				xhr.crossDomain = true
 				xhr.setRequestHeader('authorization', auth.authorization)

@@ -82,6 +82,6 @@ function getAuth (e) {
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
 	getAuth,
-	{urls: ['https://*.twitter.com/*']},
+	{urls: ['https://*.x.com/*']},
 	['requestHeaders']
 )
